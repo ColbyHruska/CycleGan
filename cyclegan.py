@@ -17,9 +17,10 @@ class CycleGAN():
         self.img_shape = (self.img_rows, self.img_cols, self.channels)
 
         # Configure data loader
-        self.dataset_name = 'portraits'
-        self.data_loader = DataLoader(dataset_name=self.dataset_name,
+        self.data_loader = DataLoader(src="openimages",
+                                      dst="paintings",
                                       img_res=(self.img_rows, self.img_cols))
+        self.dataset_name = self.data_loader.dataset_name
 
 
         # Calculate output shape of D (PatchGAN)
@@ -32,7 +33,7 @@ class CycleGAN():
 
         # Loss weights
         self.lambda_cycle = 5.0                    # Cycle-consistency loss
-        self.lambda_id = 0.1 * self.lambda_cycle    # Identity loss
+        self.lambda_id = 0.2 * self.lambda_cycle    # Identity loss
 
         optimizer = Adam(0.0002, 0.5)
 
@@ -208,6 +209,9 @@ class CycleGAN():
                 # If at save interval => save generated image samples
                 if batch_i % sample_interval == 0:
                     self.sample_images(epoch, batch_i)
+                if batch_i % 500 == 0:
+                    self.g_AB.save_weights(f"./saved_model/{self.dataset_name}_g_AB{epoch}.h5")
+                    self.g_BA.save_weights(f"./saved_model/{self.dataset_name}_g_BA{epoch}.h5")
 
     def sample_images(self, epoch, batch_i):
         os.makedirs('images/%s' % self.dataset_name, exist_ok=True)
